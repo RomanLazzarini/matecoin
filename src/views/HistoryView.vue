@@ -10,6 +10,13 @@
         {{ transaction.action.toUpperCase() }} -
         {{ transaction.crypto_amount }}
         {{ transaction.crypto_code.toUpperCase() }}
+
+        <router-link
+          :to="{ name: 'editTransaction', params: { id: transaction._id } }"
+          class="edit-link"
+        >
+          [Editar/Borrar]
+        </router-link>
       </li>
     </ul>
 
@@ -25,20 +32,17 @@ export default {
   data() {
     return {
       transactions: [],
-      isLoading: true, // Agregamos el estado de carga
+      isLoading: true,
     }
   },
 
-  // AÑADIMOS LA SECCIÓN METHODS
   methods: {
-    // Método para formatear la fecha que viene de la API (Formato ISO)
+    // Método para formatear la fecha (sin cambios)
     formatDisplayDate(isoString) {
       if (!isoString) return 'Fecha desconocida'
       try {
-        // Creamos un objeto Date a partir del string ISO que devuelve la API
         const date = new Date(isoString)
 
-        // Formatea al estilo local (ej: 07/11/2021 17:50)
         return (
           date.toLocaleDateString() +
           ' ' +
@@ -52,36 +56,62 @@ export default {
         return 'Formato Inválido'
       }
     },
+
+    // Método para obtener transacciones (sin cambios)
+    async fetchTransactions() {
+      this.isLoading = true
+
+      if (!this.$store.state.userId) {
+        this.$router.push('/')
+        this.isLoading = false
+        return
+      }
+
+      try {
+        const userId = this.$store.state.userId
+
+        const response = await apiClient.get(
+          `/transactions?q={"user_id": "${userId}"}`
+        )
+
+        this.transactions = response.data
+        console.log('Transacciones obtenidas:', this.transactions)
+      } catch (error) {
+        console.error('Error al obtener las transacciones:', error)
+        alert(
+          'Hubo un error al cargar el historial. Intenta nuevamente más tarde.'
+        )
+      } finally {
+        this.isLoading = false
+      }
+    },
   },
 
+  // LLAMAMOS AL NUEVO MÉTODO DE CARGA
   async mounted() {
-    // 1. Inicializamos la carga
-    this.isLoading = true
-
-    if (!this.$store.state.userId) {
-      this.$router.push('/')
-      this.isLoading = false // Detenemos la carga si redirigimos
-      return
-    }
-
-    try {
-      const userId = this.$store.state.userId
-
-      const response = await apiClient.get(
-        `/transactions?q={"user_id": "${userId}"}`
-      )
-
-      this.transactions = response.data
-      console.log('Transacciones obtenidas:', this.transactions)
-    } catch (error) {
-      console.error('Error al obtener las transacciones:', error)
-      alert(
-        'Hubo un error al cargar el historial. Intenta nuevamente más tarde.'
-      )
-    } finally {
-      // 2. Detenemos la carga al finalizar, independientemente del resultado
-      this.isLoading = false
-    }
+    this.fetchTransactions()
   },
 }
 </script>
+
+<style scoped>
+/* Añade un poco de estilo al link de edición si lo deseas */
+.edit-link {
+  font-size: 0.9em;
+  margin-left: 15px;
+  color: #42b983; /* Color verde de Vue */
+  text-decoration: none;
+  font-weight: bold;
+}
+.edit-link:hover {
+  text-decoration: underline;
+}
+
+/* El resto de tus estilos de HistoryView */
+.history-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+}
+/* ... otros estilos de ul/li ... */
+</style>
