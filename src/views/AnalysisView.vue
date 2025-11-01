@@ -33,6 +33,14 @@
             </tr>
           </tfoot>
         </table>
+
+        <h2 style="margin-top: 40px">Distribución de la Cartera</h2>
+        <div style="max-width: 500px; height: 300px; margin: 0 auto">
+          <DoughnutChart
+            :chart-data="chartDataObject"
+            v-if="chartDataObject.labels && chartDataObject.labels.length > 0"
+          />
+        </div>
       </section>
 
       <p v-else>
@@ -44,24 +52,28 @@
 
 <script>
 import apiClient from '@/services/apiClient'
-import axios from 'axios' // 1. IMPORTAMOS AXIOS PARA CRIPTOYA
+// ELIMINAMOS LA IMPORTACIÓN DE AXIOS para solucionar el error de linter
+import { fetchCryptoPrice } from '@/services/cryptoPriceService'
+import DoughnutChart from '@/components/DoughnutChart.vue'
 
 export default {
   name: 'AnalysisView',
+  components: { DoughnutChart },
   data() {
     return {
       isLoading: true,
       transactions: [],
       portfolio: {},
-      prices: {}, // Almacenará los precios de CriptoYa
-      finalAnalysis: [], // Nuevo: El array final con {cryptoCode, amount, currentValue}
-      totalPortfolioValue: 0, // Nuevo: El valor total en ARS
-      exchange: 'satoshitango', // Exchange de CriptoYa a usar
+      prices: {},
+      finalAnalysis: [],
+      totalPortfolioValue: 0,
+      exchange: 'satoshitango',
+      chartDataObject: {},
     }
   },
 
   methods: {
-    // FUNCIÓN CLAVE: Calcula la tenencia de cada criptomoneda (SIN CAMBIOS)
+    // 1. FUNCIÓN CLAVE: Calcula la tenencia de cada criptomoneda
     calculatePortfolio(transactions) {
       const portfolio = {}
 
@@ -89,31 +101,14 @@ export default {
       return consolidated
     },
 
-    // NUEVO: Método para obtener el precio de una sola cripto desde CriptoYa
-    async fetchCryptoPrice(cryptoCode) {
-      // La URL es: https://criptoya.com/api/{exchange}/{crypto_code}/ars/
-      const url = `https://criptoya.com/api/${this.exchange}/${cryptoCode}/ars`
-      try {
-        // Usamos axios (no apiClient) ya que es una API diferente
-        const response = await axios.get(url)
-        // El valor de venta (BID) es el relevante para la valorización de tu cartera
-        return response.data.bid
-      } catch (error) {
-        console.error(`Error al obtener precio para ${cryptoCode}:`, error)
-        // Devolvemos 0 si falla para evitar cálculos incorrectos
-        return 0
-      }
-    },
-
-    // NUEVO: Método auxiliar para formatear números a formato ARS (separador de miles)
+    // 2. FUNCIÓN AUXILIAR: Formato de números ARS
     formatNumber(value) {
-      // Asegura que el valor sea un número y usa formato local argentino (punto de miles, coma decimal)
       return parseFloat(value).toLocaleString('es-AR', {
         minimumFractionDigits: 2,
       })
     },
 
-    // MODIFICADO: Ahora obtiene precios y valoriza
+    // 3. LÓGICA PRINCIPAL (MODIFICADA para usar el servicio externo)
     async fetchAndCalculate() {
       const userId = this.$store.state.userId
 
@@ -126,7 +121,7 @@ export default {
       let calculatedPortfolio = {}
 
       try {
-        // 1. OBTENER TRANSACCIONES Y CONSOLIDAR (Lógica ya probada)
+        // OBTENER TRANSACCIONES
         const response = await apiClient.get(
           `/transactions?q={"user_id": "${userId}"}`
         )
@@ -135,15 +130,16 @@ export default {
 
         const cryptoCodesToFetch = Object.keys(calculatedPortfolio)
 
-        // 2. OBTENER PRECIOS Y VALORIZAR
+        // OBTENER PRECIOS Y VALORIZAR
         let totalValue = 0
         const analysisData = []
+        const chartLabels = []
+        const chartValues = []
 
-        // Iteramos sobre las criptos que SÍ tenemos
         for (const code of cryptoCodesToFetch) {
           const amount = calculatedPortfolio[code]
-          // Llamamos a la API de CriptoYa para el precio
-          const priceBid = await this.fetchCryptoPrice(code)
+          // CAMBIO CLAVE: Usa la función importada del servicio, no this.fetchCryptoPrice
+          const priceBid = await fetchCryptoPrice(code)
 
           const currentValue = amount * priceBid
           totalValue += currentValue
@@ -151,14 +147,27 @@ export default {
           analysisData.push({
             cryptoCode: code.toUpperCase(),
             amount: amount,
-            // Guardamos el valor actual para mostrar
             currentValue: currentValue.toFixed(2),
           })
           this.prices[code] = priceBid
+
+          chartLabels.push(code.toUpperCase())
+          chartValues.push(currentValue)
         }
 
         this.finalAnalysis = analysisData
         this.totalPortfolioValue = totalValue.toFixed(2)
+
+        // CONSTRUIR EL OBJETO FINAL PARA EL GRÁFICO
+        this.chartDataObject = {
+          labels: chartLabels,
+          datasets: [
+            {
+              backgroundColor: ['#42b983', '#00D8FF', '#f87979', '#DD1B16'],
+              data: chartValues,
+            },
+          ],
+        }
       } catch (error) {
         console.error('Error en la carga del análisis:', error)
       } finally {
