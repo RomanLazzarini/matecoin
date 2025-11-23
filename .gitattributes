@@ -1,0 +1,9 @@
+# Forzar el uso de LF (Line Feed) en todos los archivos de texto
+* text=auto eol=lf
+
+# Excluir archivos binarios (imágenes, etc) de esta regla
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
