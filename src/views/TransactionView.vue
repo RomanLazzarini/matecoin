@@ -18,6 +18,18 @@
         <option value="usdc">USDC</option>
       </select>
 
+      <!-- Selector de Exchange -->
+      <label for="exchange">Exchange:</label>
+      <select v-model="selectedExchange" id="exchange">
+        <option
+          v-for="exchange in exchanges"
+          :key="exchange.id"
+          :value="exchange.id"
+        >
+          {{ exchange.name }}
+        </option>
+      </select>
+
       <label for="crypto-amount">Cantidad (ej: 0.00070):</label>
       <input
         id="crypto-amount"
@@ -30,6 +42,12 @@
 
       <label for="money-spent">
         Monto {{ action === 'purchase' ? 'pagado' : 'cobrado' }} (en ARS):
+        <span v-if="isPriceLoading" class="price-info"
+          >Obteniendo precio...</span
+        >
+        <span v-if="unitPrice" class="price-info"
+          >(Calculado automáticamente)</span
+        >
       </label>
       <input
         id="money-spent"
@@ -38,6 +56,7 @@
         step="any"
         min="1"
         required
+        :readonly="unitPrice > 0"
       />
 
       <label for="datetime">Fecha y Hora de la Transacción:</label>
@@ -52,19 +71,77 @@
 
 <script>
 import apiClient from '@/services/apiClient'
+import { fetchCryptoPrice } from '@/services/cryptoPriceService'
 
 export default {
   name: 'TransactionView',
   data() {
     return {
+      action: 'purchase',
       cryptoCode: 'btc',
       cryptoAmount: 0,
       money: 0,
       datetime: new Date().toISOString().slice(0, 16),
-      action: 'purchase', // Estado inicial para la acción
+      selectedExchange: 'satoshitango',
+      exchanges: [
+        { id: 'satoshitango', name: 'SatoshiTango' },
+        { id: 'ripio', name: 'Ripio' },
+        { id: 'buenbit', name: 'Buenbit' },
+        { id: 'lemoncash', name: 'Lemon Cash' },
+      ],
+      unitPrice: null,
+      isPriceLoading: false,
     }
   },
+  watch: {
+    // Observadores para obtener el precio automáticamente
+    cryptoCode() {
+      this.fetchPrice()
+    },
+    selectedExchange() {
+      this.fetchPrice()
+    },
+    // Observador para calcular el monto total
+    cryptoAmount(newAmount) {
+      if (this.unitPrice) {
+        this.money = (newAmount * this.unitPrice).toFixed(2)
+      }
+    },
+  },
   methods: {
+    async fetchPrice() {
+      if (!this.cryptoCode || !this.selectedExchange) return
+
+      this.isPriceLoading = true
+      this.unitPrice = null // Resetea el precio anterior
+      try {
+        const price = await fetchCryptoPrice(
+          this.cryptoCode,
+          this.selectedExchange
+        )
+        if (price) {
+          // Para COMPRAR, usamos el precio de VENTA del exchange (ask)
+          // Para VENDER, usamos el precio de COMPRA del exchange (bid)
+          this.unitPrice =
+            this.action === 'purchase' ? price.totalAsk : price.totalBid
+
+          // Recalcular el monto si ya hay una cantidad
+          if (this.cryptoAmount > 0) {
+            this.money = (this.cryptoAmount * this.unitPrice).toFixed(2)
+          }
+        } else {
+          this.unitPrice = null
+        }
+      } catch (error) {
+        console.error('Error al obtener el precio:', error)
+        alert(
+          'No se pudo obtener el precio para la criptomoneda y exchange seleccionados.'
+        )
+        this.unitPrice = null
+      } finally {
+        this.isPriceLoading = false
+      }
+    },
     async handleSubmit() {
       if (this.cryptoAmount <= 0 || this.money <= 0) {
         alert('La cantidad y el monto deben ser mayores a cero.')
@@ -80,23 +157,21 @@ export default {
 
       const transactionData = {
         user_id: userId,
-        action: this.action, // Usa el valor dinámico del SELECT
+        action: this.action,
         crypto_code: this.cryptoCode,
         crypto_amount: this.cryptoAmount.toString(),
         money: this.money.toString(),
         datetime: this.formatDate(this.datetime),
+        // No guardamos el exchange, como se acordó
       }
 
       try {
-        const response = await apiClient.post('/transactions', transactionData)
-
-        console.log('Transacción registrada con éxito:', response.data)
+        await apiClient.post('/transactions', transactionData)
         alert(
           `¡Transacción de ${
             this.action === 'purchase' ? 'compra' : 'venta'
-          } registrada con éxito! Verifica el historial.`
+          } registrada con éxito!`
         )
-
         this.$router.push('/history')
       } catch (error) {
         console.error('Error al registrar la transacción:', error)
@@ -105,8 +180,6 @@ export default {
         )
       }
     },
-
-    // Función de ayuda para convertir el formato del input datetime-local
     formatDate(isoDateString) {
       const date = new Date(isoDateString)
       const day = String(date.getDate()).padStart(2, '0')
@@ -114,9 +187,12 @@ export default {
       const year = date.getFullYear()
       const hours = String(date.getHours()).padStart(2, '0')
       const minutes = String(date.getMinutes()).padStart(2, '0')
-
       return `${day}-${month}-${year} ${hours}:${minutes}`
     },
+  },
+  mounted() {
+    // Obtener el precio inicial al cargar el componente
+    this.fetchPrice()
   },
 }
 </script>
@@ -143,5 +219,14 @@ form button {
   color: white;
   border: none;
   cursor: pointer;
+}
+.price-info {
+  font-size: 0.8em;
+  color: #666;
+  margin-left: 5px;
+}
+input:read-only {
+  background-color: #f2f2f2;
+  cursor: not-allowed;
 }
 </style>

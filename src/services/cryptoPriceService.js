@@ -1,18 +1,27 @@
-// src/services/cryptoPriceService.js
 import axios from 'axios'
 
 // Usaremos este exchange como constante
-const EXCHANGE = 'satoshitango'
+// Eliminamos la constante fija que te ataba a un solo exchange
+//const EXCHANGE = 'satoshitango'
 
-export async function fetchCryptoPrice(cryptoCode) {
-  // La URL es: https://criptoya.com/api/{exchange}/{crypto_code}/ars/
-  const url = `https://criptoya.com/api/${EXCHANGE}/${cryptoCode}/ars`
+// Modificamos la función para aceptar 'exchange' como parámetro
+// Le ponemos un valor por defecto ('satoshitango') para no romper el código existente
+
+export async function fetchCryptoPrice(cryptoCode, exchange = 'satoshitango') {
+  const exchangeClean = exchange.toLowerCase()
+  const cryptoClean = cryptoCode.toLowerCase()
+  const url = `https://criptoya.com/api/${exchangeClean}/${cryptoClean}/ars`
+
   try {
     const response = await axios.get(url)
-    // El valor de venta (BID) es el relevante
-    return response.data.bid
+    // Devolvemos el objeto completo (ask, bid, etc.)
+    return response.data
   } catch (error) {
-    console.error(`Error al obtener precio para ${cryptoCode}:`, error)
-    return 0
+    console.error(
+      `Error al obtener precio para ${cryptoClean} en ${exchangeClean}:`,
+      error
+    )
+    // Devolvemos null para que el componente pueda manejar el error
+    return null
   }
 }
