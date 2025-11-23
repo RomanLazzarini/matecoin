@@ -138,21 +138,23 @@ export default {
 
         for (const code of cryptoCodesToFetch) {
           const amount = calculatedPortfolio[code]
-          // CAMBIO CLAVE: Usa la función importada del servicio, no this.fetchCryptoPrice
-          const priceBid = await fetchCryptoPrice(code)
+          const priceData = await fetchCryptoPrice(code) // Ahora devuelve un objeto
+          const priceBid = priceData ? priceData.bid : 0 // Usar el BID para valorizar
 
-          const currentValue = amount * priceBid
-          totalValue += currentValue
+          if (priceBid > 0) {
+            const currentValue = amount * priceBid
+            totalValue += currentValue
 
-          analysisData.push({
-            cryptoCode: code.toUpperCase(),
-            amount: amount,
-            currentValue: currentValue.toFixed(2),
-          })
-          this.prices[code] = priceBid
+            analysisData.push({
+              cryptoCode: code.toUpperCase(),
+              amount: amount,
+              currentValue: currentValue.toFixed(2),
+            })
+            this.prices[code] = priceBid
 
-          chartLabels.push(code.toUpperCase())
-          chartValues.push(currentValue)
+            chartLabels.push(code.toUpperCase())
+            chartValues.push(currentValue)
+          }
         }
 
         this.finalAnalysis = analysisData
