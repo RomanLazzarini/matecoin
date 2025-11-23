@@ -18,7 +18,6 @@
         <option value="usdc">USDC</option>
       </select>
 
-      <!-- Selector de Exchange -->
       <label for="exchange">Exchange:</label>
       <select v-model="selectedExchange" id="exchange">
         <option
@@ -59,9 +58,6 @@
         :readonly="unitPrice > 0"
       />
 
-      <label for="datetime">Fecha y Hora de la Transacción:</label>
-      <input id="datetime" type="datetime-local" v-model="datetime" required />
-
       <button type="submit">
         Registrar {{ action === 'purchase' ? 'Compra' : 'Venta' }}
       </button>
@@ -81,7 +77,7 @@ export default {
       cryptoCode: 'btc',
       cryptoAmount: 0,
       money: 0,
-      datetime: new Date().toISOString().slice(0, 16),
+      // ELIMINADO: datetime ya no se necesita en data()
       selectedExchange: 'satoshitango',
       exchanges: [
         { id: 'satoshitango', name: 'SatoshiTango' },
@@ -94,14 +90,12 @@ export default {
     }
   },
   watch: {
-    // Observadores para obtener el precio automáticamente
     cryptoCode() {
       this.fetchPrice()
     },
     selectedExchange() {
       this.fetchPrice()
     },
-    // Observador para calcular el monto total
     cryptoAmount(newAmount) {
       if (this.unitPrice) {
         this.money = (newAmount * this.unitPrice).toFixed(2)
@@ -113,19 +107,16 @@ export default {
       if (!this.cryptoCode || !this.selectedExchange) return
 
       this.isPriceLoading = true
-      this.unitPrice = null // Resetea el precio anterior
+      this.unitPrice = null
       try {
         const price = await fetchCryptoPrice(
           this.cryptoCode,
           this.selectedExchange
         )
         if (price) {
-          // Para COMPRAR, usamos el precio de VENTA del exchange (ask)
-          // Para VENDER, usamos el precio de COMPRA del exchange (bid)
           this.unitPrice =
             this.action === 'purchase' ? price.totalAsk : price.totalBid
 
-          // Recalcular el monto si ya hay una cantidad
           if (this.cryptoAmount > 0) {
             this.money = (this.cryptoAmount * this.unitPrice).toFixed(2)
           }
@@ -142,6 +133,7 @@ export default {
         this.isPriceLoading = false
       }
     },
+
     async handleSubmit() {
       if (this.cryptoAmount <= 0 || this.money <= 0) {
         alert('La cantidad y el monto deben ser mayores a cero.')
@@ -161,8 +153,10 @@ export default {
         crypto_code: this.cryptoCode,
         crypto_amount: this.cryptoAmount.toString(),
         money: this.money.toString(),
-        datetime: this.formatDate(this.datetime),
-        // No guardamos el exchange, como se acordó
+
+        // 🟢 SOLUCIÓN DEFINITIVA: Generamos la fecha AQUÍ Y AHORA en formato ISO
+        // Esto garantiza que la BD la acepte y evita el error de 1970
+        datetime: new Date().toISOString(),
       }
 
       try {
@@ -180,24 +174,16 @@ export default {
         )
       }
     },
-    formatDate(isoDateString) {
-      const date = new Date(isoDateString)
-      const day = String(date.getDate()).padStart(2, '0')
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const year = date.getFullYear()
-      const hours = String(date.getHours()).padStart(2, '0')
-      const minutes = String(date.getMinutes()).padStart(2, '0')
-      return `${day}-${month}-${year} ${hours}:${minutes}`
-    },
+    // ELIMINADO: formatDate ya no se necesita
   },
   mounted() {
-    // Obtener el precio inicial al cargar el componente
     this.fetchPrice()
   },
 }
 </script>
 
 <style scoped>
+/* (Tus estilos se mantienen igual) */
 .transaction-container {
   max-width: 500px;
   margin: 50px auto;
