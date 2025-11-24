@@ -16,6 +16,9 @@
         <option value="btc">Bitcoin (BTC)</option>
         <option value="eth">Ethereum (ETH)</option>
         <option value="usdc">USDC</option>
+        <option value="usdt">Tether (USDT)</option>
+        <option value="dai">DAI</option>
+        <option value="sol">Solana (SOL)</option>
       </select>
 
       <label for="exchange">Exchange:</label>
@@ -154,7 +157,7 @@ export default {
         crypto_amount: this.cryptoAmount.toString(),
         money: this.money.toString(),
 
-        // 🟢 SOLUCIÓN DEFINITIVA: Generamos la fecha AQUÍ Y AHORA en formato ISO
+        // Generamos la fecha AQUÍ Y AHORA
         // Esto garantiza que la BD la acepte y evita el error de 1970
         datetime: new Date().toISOString(),
       }
@@ -183,7 +186,6 @@ export default {
 </script>
 
 <style scoped>
-/* (Tus estilos se mantienen igual) */
 .transaction-container {
   max-width: 500px;
   margin: 50px auto;

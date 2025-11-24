@@ -20,6 +20,9 @@
           <option value="btc">Bitcoin (BTC)</option>
           <option value="eth">Ethereum (ETH)</option>
           <option value="usdc">USDC</option>
+          <option value="usdt">Tether (USDT)</option>
+          <option value="dai">DAI</option>
+          <option value="sol">Solana (SOL)</option>
         </select>
 
         <label for="crypto-amount">Cantidad:</label>
