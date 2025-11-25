@@ -160,12 +160,20 @@ export default {
         this.finalAnalysis = analysisData
         this.totalPortfolioValue = totalValue.toFixed(2)
 
-        // CONSTRUIR EL OBJETO FINAL PARA EL GRÁFICO
+        // 4. CONSTRUIR EL OBJETO FINAL PARA EL GRÁFICO
         this.chartDataObject = {
           labels: chartLabels,
           datasets: [
             {
-              backgroundColor: ['#42b983', '#00D8FF', '#f87979', '#DD1B16'],
+              // 🟢 NUEVO ARRAY DE COLORES (8 opciones distintas)
+              backgroundColor: [
+                '#D32F2F', // Rojo
+                '#36A2EB', // Azul
+                '#FFCE56', // Amarillo
+                '#4BC0C0', // Turquesa
+                '#9966FF', // Violeta
+                '#28A745', // Verde
+              ],
               data: chartValues,
             },
           ],
@@ -210,5 +218,4 @@ tfoot tr:last-child td {
   border-top: 2px solid #333;
   font-size: 1.1em;
 }
-/* Estilos de lista eliminados ya que usamos tabla */
 </style>
