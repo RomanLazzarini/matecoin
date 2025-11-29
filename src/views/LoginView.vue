@@ -1,36 +1,39 @@
 <template>
-  <div class="login-container">
-    <h1>Bienvenido a MateCoin</h1>
-    <p>Ingresa tu ID de usuario para gestionar tu portafolio.</p>
+  <div class="login-view">
+    <img alt="MateCoin logo" src="@/assets/logo.png" class="main-logo" />
 
-    <form @submit.prevent="handleLogin">
-      <input type="text" v-model="userId" placeholder="Tu ID alfanumérico" />
-      <button type="submit">Ingresar</button>
-    </form>
+    <h1>Bienvenido a MateCoin</h1>
+    <p>Ingresa tu credencial para gestionar tu portafolio.</p>
+
+    <div class="form-wrapper">
+      <LoginForm
+        label-text="Tu ID Alfanumérico:"
+        placeholder-text="Ej: usuario123"
+        button-text="Acceder al Sistema"
+        @submit-login="handleLoginSuccess"
+      />
+    </div>
   </div>
 </template>
 
 <script>
+import LoginForm from '@/components/LoginForm.vue'
+
 export default {
   name: 'LoginView',
-  data() {
-    return {
-      userId: '', // Aquí guardaremos lo que el usuario escriba en el input
-    }
+  components: {
+    LoginForm,
   },
   methods: {
-    handleLogin() {
-      // Validación para asegurar que el campo no esté vacío
-      if (this.userId.trim() === '') {
-        alert('Por favor, ingresa un ID para continuar.')
-        return
-      }
+    handleLoginSuccess(userIdReceived) {
+      console.log(
+        `ID validado recibido: ${userIdReceived}. Iniciando sesión...`
+      )
 
-      // 1. Despachamos la acción 'login' que creamos en Vuex
-      this.$store.dispatch('login', this.userId)
+      // 1. Vuex: Despachamos la acción
+      this.$store.dispatch('login', userIdReceived)
 
-      // 2. Redirigimos al usuario a la página de análisis
-      console.log(`Usuario ${this.userId} ha iniciado sesión. Redirigiendo...`)
+      // 2. Router: Redirigimos
       this.$router.push('/analysis')
     },
   },
@@ -38,19 +41,30 @@ export default {
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 50px auto;
+.login-view {
+  max-width: 450px;
+  margin: 60px auto;
   text-align: center;
+  padding: 20px;
 }
 
-input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+.form-wrapper {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  padding: 10px 20px;
+h1 {
+  color: #42b983;
+}
+
+.main-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 20px;
+  /* Efecto de brillo opcional */
+  filter: drop-shadow(0 0 10px rgba(66, 185, 131, 0.5));
 }
 </style>
