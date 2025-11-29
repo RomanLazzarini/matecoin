@@ -138,6 +138,7 @@ export default {
     },
 
     async handleSubmit() {
+      // 1. Validaciones básicas de inputs
       if (this.cryptoAmount <= 0 || this.money <= 0) {
         alert('La cantidad y el monto deben ser mayores a cero.')
         return
@@ -150,15 +151,57 @@ export default {
         return
       }
 
+      // 2. NUEVA VALIDACIÓN: Verificar fondos antes de VENDER
+      if (this.action === 'sale') {
+        try {
+          // A. Obtenemos el historial actual para calcular el saldo
+          // Usamos una consulta filtrada por usuario a la API
+          const response = await apiClient.get(
+            `/transactions?q={"user_id": "${userId}"}`
+          )
+          const history = response.data
+
+          // B. Calculamos el saldo actual de la moneda seleccionada
+          const currentBalance = history
+            .filter((t) => t.crypto_code === this.cryptoCode)
+            .reduce((acc, t) => {
+              return t.action === 'purchase'
+                ? acc + parseFloat(t.crypto_amount)
+                : acc - parseFloat(t.crypto_amount)
+            }, 0)
+
+          console.log(`Saldo actual de ${this.cryptoCode}: ${currentBalance}`)
+
+          // C. Verificamos si tiene suficiente para vender
+          if (this.cryptoAmount > currentBalance) {
+            alert(
+              `Error: Fondos insuficientes.\n\n` +
+                `Intentas vender: ${
+                  this.cryptoAmount
+                } ${this.cryptoCode.toUpperCase()}\n` +
+                `Tienes disponible: ${currentBalance.toFixed(
+                  6
+                )} ${this.cryptoCode.toUpperCase()}`
+            )
+            return // <--- DETENEMOS LA EJECUCIÓN AQUÍ (No se guarda nada)
+          }
+        } catch (error) {
+          console.error('Error al validar fondos:', error)
+          alert('Error al verificar tus fondos. Intenta nuevamente.')
+          return
+        }
+      }
+      // ---------------------------------------------------------
+      // FIN DE LA VALIDACIÓN
+      // ---------------------------------------------------------
+
       const transactionData = {
         user_id: userId,
         action: this.action,
         crypto_code: this.cryptoCode,
         crypto_amount: this.cryptoAmount.toString(),
         money: this.money.toString(),
-
-        // Generamos la fecha AQUÍ Y AHORA
-        // Esto garantiza que la BD la acepte y evita el error de 1970
+        // Mantenemos el fix de la fecha automática que hicimos antes
         datetime: new Date().toISOString(),
       }
 
