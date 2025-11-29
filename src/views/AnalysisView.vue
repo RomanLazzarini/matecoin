@@ -168,11 +168,11 @@ export default {
               // 🟢 NUEVO ARRAY DE COLORES (8 opciones distintas)
               backgroundColor: [
                 '#D32F2F', // Rojo
-                '#36A2EB', // Azul
-                '#FFCE56', // Amarillo
-                '#4BC0C0', // Turquesa
-                '#9966FF', // Violeta
-                '#28A745', // Verde
+                '#2735F5', // Azul
+                '#F5EE27', // Amarillo
+                '#27EEF5', // Cyan
+                '#F527D3', // Violeta
+                '#50F527', // Verde
               ],
               data: chartValues,
             },
