@@ -198,12 +198,15 @@ export default {
   max-width: 800px;
   margin: 50px auto;
   padding: 20px;
+  text-align: center;
 }
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-left: auto;
+  margin-right: auto;
 }
 th,
 td {

@@ -112,6 +112,27 @@ export default {
   max-width: 800px;
   margin: 50px auto;
   padding: 20px;
+  text-align: center;
 }
-/* ... otros estilos de ul/li ... */
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  background-color: #f9f9f9;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 5px solid #42b983; /* Borde verde decorativo */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  /* Flexbox para alinear el contenido y el enlace de editar */
+  display: flex;
+  justify-content: center; /* Centrado horizontal */
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap; /* Para que se adapte en móviles */
+}
 </style>

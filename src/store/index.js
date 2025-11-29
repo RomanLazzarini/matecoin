@@ -17,7 +17,15 @@ export default createStore({
       // La acción "dispara" la mutación
       context.commit('SET_USER_ID', userId)
     },
+    // NUEVA ACCIÓN: Logout
+    logout(context) {
+      // Reutilizamos la mutación para poner el ID en null
+      context.commit('SET_USER_ID', null)
+    },
   },
-  getters: {}, // Puedes dejarlo vacío por ahora
-  modules: {}, // Puedes dejarlo vacío por ahora
+  getters: {
+    // Un getter útil para saber si está logueado
+    isAuthenticated: (state) => !!state.userId,
+  },
+  modules: {},
 })

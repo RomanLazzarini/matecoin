@@ -187,10 +187,11 @@ export default {
 
 <style scoped>
 .transaction-container {
-  max-width: 500px;
+  max-width: 700px;
   margin: 50px auto;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 form label,
 form input,
@@ -203,7 +204,7 @@ form button {
 form button {
   margin-top: 20px;
   padding: 10px;
-  background-color: #42b983; /* Vue green */
+  background-color: #42b983;
   color: white;
   border: none;
   cursor: pointer;
@@ -216,5 +217,9 @@ form button {
 input:read-only {
   background-color: #f2f2f2;
   cursor: not-allowed;
+}
+
+form {
+  text-align: left;
 }
 </style>
