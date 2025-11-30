@@ -80,7 +80,6 @@ export default {
       cryptoCode: 'btc',
       cryptoAmount: 0,
       money: 0,
-      // ELIMINADO: datetime ya no se necesita en data()
       selectedExchange: 'satoshitango',
       exchanges: [
         { id: 'satoshitango', name: 'SatoshiTango' },
@@ -191,9 +190,7 @@ export default {
           return
         }
       }
-      // ---------------------------------------------------------
       // FIN DE LA VALIDACIÓN
-      // ---------------------------------------------------------
 
       const transactionData = {
         user_id: userId,
@@ -220,7 +217,6 @@ export default {
         )
       }
     },
-    // ELIMINADO: formatDate ya no se necesita
   },
   mounted() {
     this.fetchPrice()

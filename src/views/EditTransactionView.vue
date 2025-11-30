@@ -231,7 +231,6 @@ export default {
 
           // 4. Validamos
           // Nota: Usamos parseFloat para asegurar comparación numérica
-          // ... (Cálculo de availableBalance igual que antes) ...
 
           const amountToSell = parseFloat(this.transaction.crypto_amount)
 
@@ -355,7 +354,7 @@ form button {
 }
 
 .cancel-button {
-  background-color: #95a5a6; /* Gris azulado */
+  background-color: #95a5a6;
   color: white;
   padding: 10px;
   border: none;

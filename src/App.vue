@@ -57,6 +57,10 @@ export default {
   color: #2c3e50;
 }
 
+h1 {
+  text-decoration: underline;
+}
+
 /* Estilos de la Barra de Navegación (Flexbox) */
 nav {
   display: flex; /* Activa el modo flexible */
