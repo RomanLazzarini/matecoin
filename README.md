@@ -1,8 +1,8 @@
-# 🧉 MateCoin - Gestor de Criptomonedas
+# 🧉 MATECOIN - Gestor de Criptomonedas
 
 > Proyecto Final de Laboratorio III - Tecnicatura Universitaria en Programación (UTN).
 
-**MATECOING** es una aplicación web (SPA) desarrollada con Vue.js que permite la gestión integral, compra, venta y análisis de un portafolio de inversión en criptomonedas.
+**MATECOIN** es una aplicación web (SPA) desarrollada con Vue.js que permite la gestión integral, compra, venta y análisis de un portafolio de inversión en criptomonedas.
 
 La aplicación se conecta a una base de datos NoSQL (**RestDB**) para la persistencia de usuarios y transacciones, y consume la API pública de **CriptoYa** para obtener cotizaciones en tiempo real.
 
