@@ -7,39 +7,46 @@
 
     <div v-else>
       <section v-if="finalAnalysis.length > 0">
-        <h2>Valorización Actual (en ARS)</h2>
+        <div class="dashboard-layout">
+          <div class="table-panel">
+            <h2>Valorización Actual (en ARS)</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Criptomoneda</th>
+                  <th>Cantidad</th>
+                  <th>Dinero (ARS)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in finalAnalysis" :key="item.cryptoCode">
+                  <td>{{ item.cryptoCode }}</td>
+                  <td>{{ item.amount.toFixed(4) }}</td>
+                  <td>$ {{ formatNumber(item.currentValue) }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2"><strong>TOTAL EN CARTERA</strong></td>
+                  <td>
+                    <strong>$ {{ formatNumber(totalPortfolioValue) }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Criptomoneda</th>
-              <th>Cantidad</th>
-              <th>Dinero (ARS)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in finalAnalysis" :key="item.cryptoCode">
-              <td>{{ item.cryptoCode }}</td>
-              <td>{{ item.amount.toFixed(4) }}</td>
-              <td>$ {{ formatNumber(item.currentValue) }}</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2"><strong>TOTAL EN CARTERA</strong></td>
-              <td>
-                <strong>$ {{ formatNumber(totalPortfolioValue) }}</strong>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <h2 style="margin-top: 40px">Distribución de la Cartera</h2>
-        <div style="max-width: 500px; height: 300px; margin: 0 auto">
-          <DoughnutChart
-            :chart-data="chartDataObject"
-            v-if="chartDataObject.labels && chartDataObject.labels.length > 0"
-          />
+          <div class="chart-panel">
+            <h2>Distribución de la Cartera</h2>
+            <div class="chart-wrapper">
+              <DoughnutChart
+                :chart-data="chartDataObject"
+                v-if="
+                  chartDataObject.labels && chartDataObject.labels.length > 0
+                "
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -52,7 +59,6 @@
 
 <script>
 import apiClient from '@/services/apiClient'
-// ELIMINAMOS LA IMPORTACIÓN DE AXIOS para solucionar el error de linter
 import { fetchCryptoPrice } from '@/services/cryptoPriceService'
 import DoughnutChart from '@/components/DoughnutChart.vue'
 
@@ -165,7 +171,6 @@ export default {
           labels: chartLabels,
           datasets: [
             {
-              // 🟢 NUEVO ARRAY DE COLORES (8 opciones distintas)
               backgroundColor: [
                 '#D32F2F', // Rojo
                 '#2735F5', // Azul
@@ -193,32 +198,92 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos para el componente */
 .analysis-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 50px auto;
   padding: 20px;
   text-align: center;
 }
+
+/* --- LAYOUT FLEXBOX --- */
+.dashboard-layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.table-panel {
+  flex: 2; /* 2/3 del ancho */
+  background-color: white;
+}
+
+.chart-panel {
+  flex: 1; /* 1/3 del ancho */
+  background-color: white;
+  min-width: 300px;
+  /* MEJORA: Flexbox interno para centrar el gráfico y su título */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* --- TABLA --- */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-left: auto;
-  margin-right: auto;
 }
+
 th,
 td {
   padding: 12px 15px;
-  text-align: left;
   border-bottom: 1px solid #ddd;
 }
-th {
-  background-color: #f2f2f2;
+
+th:first-child,
+td:first-child {
+  text-align: left;
+  padding-left: 20px;
 }
+
+th:nth-child(n + 2),
+td:nth-child(n + 2) {
+  text-align: right;
+  padding-right: 20px;
+}
+
+th {
+  background-color: #2c3e50;
+  color: white;
+}
+
 tfoot tr:last-child td {
   border-top: 2px solid #333;
   font-size: 1.1em;
+  background-color: #f9f9f9;
+  /* El total también a la derecha */
+  text-align: right;
+  padding-right: 20px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  .table-panel,
+  .chart-panel {
+    flex: 1;
+    width: 100%;
+  }
 }
 </style>

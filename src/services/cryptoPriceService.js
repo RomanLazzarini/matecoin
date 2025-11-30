@@ -1,8 +1,7 @@
 import axios from 'axios'
 
 // Usaremos este exchange como constante
-// Eliminamos la constante fija que te ataba a un solo exchange
-//const EXCHANGE = 'satoshitango'
+// Eliminamos la constante fija que ataba a un solo exchange
 
 // Modificamos la función para aceptar 'exchange' como parámetro
 // Le ponemos un valor por defecto ('satoshitango') para no romper el código existente

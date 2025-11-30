@@ -64,7 +64,6 @@ h1 {
   width: 150px;
   height: auto;
   margin-bottom: 20px;
-  /* Efecto de brillo opcional */
   filter: drop-shadow(0 0 10px rgba(66, 185, 131, 0.5));
 }
 </style>

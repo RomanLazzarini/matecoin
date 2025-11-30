@@ -34,7 +34,7 @@ export default {
   },
 
   methods: {
-    // --- MANEJO DE ACCIONES (Eventos del Hijo) ---
+    // --- MANEJO DE ACCIONES ---
 
     // Acción VER: Agregamos el parámetro '?mode=view' a la URL
     handleView(id) {
@@ -42,8 +42,8 @@ export default {
       this.$router.push({
         name: 'editTransaction',
         params: { id: id },
-        query: { mode: 'view' }, // <--- ESTA ES LA CLAVE
-      }) // <--- ¡AQUÍ ESTABA EL ERROR! Faltaba cerrar el paréntesis.
+        query: { mode: 'view' },
+      })
     },
 
     // Acción EDITAR: Navegación normal (sin query, o query vacía)
